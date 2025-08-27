@@ -1,0 +1,317 @@
+import pandas as pd
+from typing import Optional, Union, Dict, List
+from plotnine import (
+    ggplot, aes, geom_tile, geom_text, annotate,
+    theme_void, scale_fill_manual, scale_color_manual, scale_fill_discrete,
+    labs, theme, element_text, guides
+)
+from utils import define_annotation_color
+
+# load the data from directory
+ec_languages = pd.read_csv("data/ec_languages.csv")
+
+
+def ec_tile_map(
+      data=None,
+      feature_column="feature",
+      title=None,
+      title_position="left",
+      annotate_feature=False,
+      abbreviation=True,
+      hide_languages=None,
+      rename_languages=None,
+  ):
+
+      # arguments check 
+
+      # Title
+      if title is not None and not isinstance(title, str):
+          raise ValueError("The argument 'title' should be a character vector with one value")
+
+      # Title position
+      if not isinstance(title_position, str):
+          raise ValueError("The argument 'title_position' should be a character vector with one of the following values: 'left', 'center', or 'right'")
+      
+      if title_position not in ('left', 'center', 'right'):
+          raise ValueError("The argument 'title_position' should be a character vector with one of the following values: 'left', 'center', or 'right'")
+
+      # Annotate feature
+      if not isinstance(annotate_feature, bool):
+          raise ValueError("The argument 'annotate_feature' should be a logical vector with one value")
+
+      # Abbreviation
+      if not isinstance(abbreviation, bool):
+          raise ValueError("The argument 'abbreviation' should be a logical vector with one value")
+
+      # Hide languages
+      if hide_languages is not None:
+          if not all(lang in ec_languages["language"].tolist() for lang in hide_languages):
+              raise ValueError("The argument 'hide_languages' should be a character vector with languages, see 'ec_languages$language' for the possible values")
+
+      # Rename languages
+      if rename_languages is not None:
+          is_named_vector = isinstance(rename_languages, dict)
+          is_valid_df = (
+              isinstance(rename_languages, pd.DataFrame)
+              and all(col in rename_languages.columns for col in ["language", "new_language_name"])
+          )
+
+          if not (is_named_vector or is_valid_df):
+              raise ValueError("The argument 'rename_languages' should be either a named character vector with languages as a name or dataframe with columns 'language' and 'new_language_name', see 'ec_languages$language' for the possible values")
+
+      if isinstance(rename_languages, pd.DataFrame):
+          if not ("language" in rename_languages.columns and "new_language_name" in rename_languages.columns):
+              raise ValueError("The argument 'rename_languages' should be either a named character vector with languages as a name or dataframe with columns 'language' and 'new_language_name', see 'ec_languages$language' for the possible values")
+          if not all(lang in ec_languages["language"].tolist() for lang in rename_languages["language"]):
+              raise ValueError("The 'language' column in 'rename_languages' contains unexpected values, see 'ec_languages$language' for the possible values")
+      
+      elif isinstance(rename_languages, dict):
+          if not all(name in ec_languages["language"].tolist() for name in rename_languages.keys()):
+              raise ValueError("The names in 'rename_languages' contain unexpected values, see 'ec_languages$language' for the possible values")
+
+      # restructure rename_languages 
+
+      if isinstance(rename_languages, dict):
+          rename_languages = pd.DataFrame({
+              "new_language_name": list(rename_languages.values()),
+              "language": list(rename_languages.keys())
+          })
+
+      # redefine title_position 
+
+      if title_position == "left":
+          title_position = 0
+      elif title_position == "center":
+          title_position = 0.5
+      elif title_position == "right":
+          title_position = 1
+
+      # ec_template() assignment 
+
+      if data is None:
+          return ec_template(
+              title=title,
+              title_position=title_position,
+              abbreviation=abbreviation
+          )
+      else:
+
+          # arguments check 
+
+          if not isinstance(data, pd.DataFrame):
+              raise ValueError("Data should be a dataframe")
+          if "language" not in data.columns:
+              raise ValueError("Data should contain column 'language'")
+          if feature_column not in data.columns:
+              raise ValueError("Data should contain column 'feature'. If you have a column with a different name, please, use the argument 'feature_column' to provide it.")
+          # !! just a string
+          if not isinstance(feature_column, str):
+              raise ValueError("The argument 'feature_column' should be a character vector with one value")
+
+
+        # merge EC dataset with data provided by a user
+          for_plot = ec_languages.merge(data, on="language", how="left", suffixes=("", "_y"))
+          for_plot = for_plot.rename(columns={feature_column: "feature"})
+
+          # delete with _y
+          cols_to_drop = [col for col in for_plot.columns if col.endswith('_y')]
+          for_plot = for_plot.drop(columns=cols_to_drop)
+
+          # for missing colors
+          if "language_color" in for_plot.columns:
+              for_plot["language_color"] = for_plot["language_color"].fillna("#E5E5E5")
+          else:
+              for_plot["language_color"] = "#E5E5E5"
+
+          # rename languages 
+          if rename_languages is not None:
+              for_plot = for_plot.merge(rename_languages, on="language", how="left")
+              for_plot["language"] = for_plot["new_language_name"].combine_first(for_plot["language"])
+              for_plot["abbreviation"] = for_plot["new_language_name"].combine_first(for_plot["abbreviation"])
+              for_plot = for_plot.drop(columns=["new_language_name"])
+
+          # hide languages 
+          if hide_languages is not None:
+              for_plot = for_plot[~for_plot["language"].isin(hide_languages)]
+
+          # create a column with the name feature if there is no one 
+          for_plot = for_plot.rename(columns={feature_column: "feature"})
+
+          # add an 'alpha' column for the cases when there are NAs in data ----------
+          for_plot["alpha"] = for_plot["feature"].apply(lambda x: 0.2 if pd.isna(x) else 1)
+
+          # change labels to abbreviations
+          if abbreviation:
+              for_plot["language"] = for_plot.apply(
+                  lambda row: row["abbreviation"] if pd.notna(row["abbreviation"]) else row["language"],
+                  axis=1
+              )
+
+          # add feature values to the language names
+          if annotate_feature:
+              for_plot["language"] = for_plot.apply(
+                  lambda row: f"{row['language']}\n{row['feature']}" if pd.notna(row["feature"]) else row["language"],
+                  axis=1
+              )
+
+          # ec_tile_numeric() or ec_tile_categorical() 
+          if pd.api.types.is_numeric_dtype(for_plot["feature"]):
+              return ec_tile_numeric(
+                  data=for_plot,
+                  title=title,
+                  title_position=title_position,
+                  annotate_feature=annotate_feature,
+                  abbreviation=abbreviation
+              )
+          else:
+              return ec_tile_categorical(
+                  data=for_plot,
+                  title=title,
+                  title_position=title_position,
+                  annotate_feature=annotate_feature,
+                  abbreviation=abbreviation
+              )
+  
+          
+
+def ec_template(title, title_position, abbreviation):
+    # load data
+    for_plot = ec_languages.copy()
+
+    # add a 'text_color' column for the text colors
+    for_plot["text_color"] = define_annotation_color(for_plot["language_color"])
+
+    # create a factor for correct coloring in ggplot 
+    for_plot["language_color"] = pd.Categorical(
+        for_plot["language_color"],
+        categories=list(for_plot["language_color"]),
+        ordered=True
+    )
+
+    # change labels to abbreviations 
+    if abbreviation is True:
+        for_plot["language"] = for_plot.apply(
+            lambda r: r["language"] if pd.isna(r["abbreviation"]) else r["abbreviation"],
+            axis=1
+        )
+
+    # create a map 
+    map = (
+        ggplot(for_plot, aes("x", "y"))
+        + geom_tile(aes(fill="language_color"), show_legend=False)
+        + geom_text(aes(label="language", color="text_color"), show_legend=False, size = 5.3)
+        + theme_void()
+        + scale_fill_manual(values=list(ec_languages["language_color"]))
+        + scale_color_manual(values=["black", "white"])
+        + labs(color=None, title=title)
+        + theme(plot_title=element_text(hjust=title_position))
+    )
+
+    return map
+
+
+
+def ec_tile_numeric(data, title, title_position, annotate_feature, abbreviation):
+    # load data
+    for_plot = data.copy()
+
+    # add a 'text_color' column for the text colors 
+    for_plot["text_color"] = for_plot["feature"].isna().map(
+        lambda is_na: "#999999" if is_na else "#E5E5E5"
+    )
+
+    # subset with notna features
+    for_plot_non_na = for_plot[for_plot["feature"].notna()].copy()
+
+    # create a map
+    p = (
+        ggplot(for_plot, aes("x", "y", fill="feature", alpha="alpha"))
+        + geom_tile(aes(alpha="alpha"), size=0)
+        + geom_tile(data=for_plot_non_na, mapping=aes(fill="feature", alpha="alpha"), size=0)
+        + annotate(
+            "text",
+            x=for_plot.loc[for_plot["text_color"] == "#000000", "x"],
+            y=for_plot.loc[for_plot["text_color"] == "#000000", "y"],
+            label=for_plot.loc[for_plot["text_color"] == "#000000", "language"],
+            color="#000000", size=11
+        )
+        + annotate(
+            "text",
+            x=for_plot.loc[for_plot["text_color"] == "#E5E5E5", "x"],
+            y=for_plot.loc[for_plot["text_color"] == "#E5E5E5", "y"],
+            label=for_plot.loc[for_plot["text_color"] == "#E5E5E5", "language"],
+            color="#E5E5E5", size=11
+        )
+        + annotate(
+            "text",
+            x=for_plot.loc[for_plot["text_color"] == "#999999", "x"],
+            y=for_plot.loc[for_plot["text_color"] == "#999999", "y"],
+            label=for_plot.loc[for_plot["text_color"] == "#999999", "language"],
+            color="#999999", size=11
+        )
+        + theme_void()
+        + labs(fill=None, color=None, title=title)
+        + theme(
+            legend_position="bottom",
+            plot_title=element_text(hjust=title_position)
+        )
+        + guides(alpha="none")
+    )
+    return p
+
+
+
+def ec_tile_categorical(data, title, title_position, annotate_feature, abbreviation):
+    # load data 
+    for_plot = data.copy()
+
+    # add a 'text_color' column for the text colors 
+    for_plot["text_color"] = for_plot["feature"].isna().map(
+        lambda is_na: "#999999" if is_na else "#000000"
+    )
+
+    # subset with notna features for the second layer
+    for_plot_non_na = for_plot[for_plot["feature"].notna()].copy()
+
+    # is categorical
+    for_plot_non_na["feature"] = pd.Categorical(for_plot_non_na["feature"])
+
+    # create a map
+    p = (
+        ggplot(for_plot, aes("x", "y", alpha="alpha"))
+        + geom_tile(size=0, color="#E5E5E5")
+        #+ geom_tile(aes(fill="feature"), size=0)
+
+        # second layer for notna
+        + geom_tile(data=for_plot_non_na, mapping=aes(fill="feature"), size=0)
+        + annotate(
+            "text",
+            x=for_plot.loc[for_plot["text_color"] == "#000000", "x"],
+            y=for_plot.loc[for_plot["text_color"] == "#000000", "y"],
+            label=for_plot.loc[for_plot["text_color"] == "#000000", "language"],
+            color="#000000", size = 5.3
+        )
+        + annotate(
+            "text",
+            x=for_plot.loc[for_plot["text_color"] == "#E5E5E5", "x"],
+            y=for_plot.loc[for_plot["text_color"] == "#E5E5E5", "y"],
+            label=for_plot.loc[for_plot["text_color"] == "#E5E5E5", "language"],
+            color="#E5E5E5", size = 5.3
+        )
+        + annotate(
+            "text",
+            x=for_plot.loc[for_plot["text_color"] == "#999999", "x"],
+            y=for_plot.loc[for_plot["text_color"] == "#999999", "y"],
+            label=for_plot.loc[for_plot["text_color"] == "#999999", "language"],
+            color="#999999", size = 5.3
+        )
+        + theme_void()
+        + labs(fill=None, color=None, title=title)
+        + theme(
+            legend_position="bottom",
+            plot_title=element_text(hjust=title_position)
+        )
+        + guides(alpha="none")
+        + scale_fill_discrete(na_translate=False)
+    )
+    return p

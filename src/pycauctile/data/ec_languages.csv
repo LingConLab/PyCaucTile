@@ -1,0 +1,57 @@
+language,branch,family,glottocode,language_color,branch_color,x,y,abbreviation,morning_greetings,consonant_inventory_size
+Agul,Lezgic,East Caucasian,aghu1253,#00cc66,#ffd000,8,4,,Good morning,44.0
+Amuzgi-Shiri,Dargwa,East Caucasian,sout3261,#f9ec49,#ffb268,9,5,,,
+Archi,Lezgic,East Caucasian,arch1244,#88ff26,#ffd000,6,5,,Did you wake up?,69.0
+Avar,Avar-Andic,East Caucasian,avar1256,#009999,#009999,6,7,,Did you wake up?,45.0
+Azerbaijani,Oghuz,Turkic,nort2697,#cccccc,#666666,8,1,,Good morning,25.0
+Bagvalal,Avar-Andic,East Caucasian,bagv1239,#000066,#009cff,4,9,,Did you wake up?,65.0
+Bezhta,Tsezic,East Caucasian,bezh1248,#ff5050,#ff0066,4,6,,Did you wake up?,34.0
+Borch-Khnov,Lezgic,East Caucasian,rutu1240,#009900,#ffd000,9,2,,,44.0
+Botlikh,Avar-Andic,East Caucasian,botl1242,#327fcb,#5fc1ff,4,10,,Did you wake up?,69.0
+Budukh,Lezgic,East Caucasian,budu1248,#3e7a04,#ffd000,11,2,,Good morning,37.0
+Chamalal,Avar-Andic,East Caucasian,cham1309,#000099,#0c60db,3,8,,Did you wake up?,49.0
+Chechen,Nakh,East Caucasian,chec1245,#996600,#996600,3,12,,Good morning,39.0
+Chirag,Dargwa,East Caucasian,chir1284,#fecc9b,#ffb268,7,4,,,48.0
+Eastern Armenian,Armenic,Indo-European,nucl1235,#9d76ff,#cab3ff,1,1,Armenian,Good morning,31.0
+Georgian,Georgic,Kartvelian,nucl1302,#9effed,#9effed,1,4,,Good morning,28.0
+Gigatli,Avar-Andic,East Caucasian,cham1309,#0000c3,#ff8c00,3,9,,,73.0
+Godoberi,Avar-Andic,East Caucasian,ghod1238,#2563de,#b99c00,3,10,,Did you wake up?,61.0
+Hapshima,Dargwa,East Caucasian,darg1241,#ff8c00,#ffb268,8,7,,,
+Hinuq,Tsezic,East Caucasian,hinu1240,#ff0066,#ff0066,3,6,,Did you wake up?,42.0
+Hunzib,Tsezic,East Caucasian,hunz1247,#cc0000,#ff0066,4,5,,Did you wake up?,41.0
+Ingush,Nakh,East Caucasian,ingu1240,#663300,#996600,2,12,,Good morning,39.0
+Juhuri,Iranian,Indo-European,jude1256,#9a7ee0,#cab3ff,12,5,,Good morning,22.0
+Kajtag,Dargwa,East Caucasian,kajt1238,#b99c00,#ffb268,11,6,,Did you wake up?,63.0
+Karata,Avar-Andic,East Caucasian,kara1474,#4a4ab5,#eec400,5,10,,Did you wake up?,47.0
+Khinalug,Khinalug,East Caucasian,khin1240,#ead1dc,#fff672,10,1,,Good morning,55.0
+Khwarshi,Tsezic,East Caucasian,khva1239,#ec2525,#ff0066,3,7,,Did you wake up?,66.0
+Kryz,Lezgic,East Caucasian,kryt1240,#43cd71,#ffd000,10,2,,Good morning,47.0
+Kubachi,Dargwa,East Caucasian,kuba1248,#d4c948,#ffb268,9,6,,Did you wake up?,42.0
+Kumyk,Kipchak,Turkic,kumy1244,#a6a6a6,#666666,8,11,,Good morning,25.0
+Lak,Lak,East Caucasian,lakk1252,#ff00fa,#ffb8ff,7,6,,Both,64.0
+Lezgian,Lezgic,East Caucasian,lezg1247,#00cc00,#ffd000,10,3,,Good morning,52.0
+Lower Andi,Avar-Andic,East Caucasian,lowe1465,#003366,#009900,5,11,L. Andi,Did you wake up?,
+Mehweb,Dargwa,East Caucasian,darg1241,#ffb268,#ffb268,7,7,,Did you wake up?,49.0
+Mitahi-Jalqan,Iranian,Indo-European,nort2697,#cab3ff,#cab3ff,12,6,,,22.0
+Muira,Dargwa,East Caucasian,darg1241,#ff984e,#ffb268,10,7,,,
+Nogai,Kipchak,Turkic,noga1249,#666666,#666666,7,12,,Good morning,26.0
+Northern Akhvakh,Avar-Andic,East Caucasian,akhv1239,#5fc1ff,#34ed34,5,8,N. Akhvakh,Did you wake up?,89.0
+Northern Dargwa,Dargwa,East Caucasian,darg1241,#ee7621,#ffb268,9,8,N. Dargwa,Did you wake up?,36.0
+Qushan Agul,Lezgic,East Caucasian,kosh1245,#00ff80,#ffd000,9,4,,,56.0
+Rutul,Lezgic,East Caucasian,rutu1240,#34ed34,#ffd000,9,3,,Good morning,56.0
+Sanaqari-Chahrizhi,Dargwa,East Caucasian,kajt1238,#ffd000,#ffb268,10,6,Sanaqari-Chah,,
+Sanzhi-Itsari,Dargwa,East Caucasian,sout3261,#eee685,#ffb268,8,5,,Did you wake up?,53.0
+Shari,Dargwa,East Caucasian,kajt1238,#eec400,#ffb268,10,5,,,
+Southern Akhvakh,Avar-Andic,East Caucasian,sout3319,#009cff,#ff5050,5,7,S. Akhvakh,,
+Southwestern Dargwa,Dargwa,East Caucasian,sout3261,#fff672,#ffb268,8,6,SW. Dargwa,Did you wake up?,59.0
+Tabasaran,Lezgic,East Caucasian,taba1259,#44c044,#ffd000,10,4,,Good morning,55.0
+Tat,Iranian,Indo-European,musl1236,#bba2ff,#cab3ff,12,1,,,27.0
+Tindi,Avar-Andic,East Caucasian,tind1238,#0c60db,#990033,4,8,,Did you wake up?,84.0
+Tsakhur,Lezgic,East Caucasian,tsak1249,#409c00,#ffd000,8,3,,Good morning,65.0
+Tsez,Tsezic,East Caucasian,dido1241,#990033,#ff0066,2,6,,Did you wake up?,45.0
+Tsova-Tush,Nakh,East Caucasian,bats1242,#7d552c,#996600,2,4,,,41.0
+Tsudaqar,Dargwa,East Caucasian,darg1241,#ffc65b,#ffb268,8,8,,Did you wake up?,
+Tukita,Avar-Andic,East Caucasian,kara1474,#6262ff,#9effed,5,9,,Did you wake up?,48.0
+Udi,Lezgic,East Caucasian,udii1243,#006400,#ffd000,9,1,,Good morning,38.0
+Upper Andi,Avar-Andic,East Caucasian,uppe1485,#095097,#666666,4,11,Up. Andi,Did you wake up?,58.0
+Usisha-Butri,Dargwa,East Caucasian,darg1241,#cf7d1c,#ffb268,9,7,,,
