@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "PyCaucTile"
+version = "0.1.0"
+authors = [
+  { name="Vladislava Termus", email="vl.trmus@gmail.com" },
+]
+description = "A package for generating tile grid maps of East Caucasian languages"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pandas>=1.3.0",
+    "numpy>=1.21.0",
+    "matplotlib>=3.5.0",
+    "plotnine>=0.10.0",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+license = "GPL-3.0"
+license-files = ["LICENSE.md"]
+
+[project.urls]
+Homepage = "https://github.com/LingConLab/PyCaucTile"
