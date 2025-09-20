@@ -1,14 +1,26 @@
+import sys
+import os
 import pandas as pd
 from typing import Optional, Union, Dict, List
 from plotnine import (
     ggplot, aes, geom_tile, geom_text, annotate,
     theme_void, scale_fill_manual, scale_color_manual, scale_fill_discrete,
-    labs, theme, element_text, guides
+    scale_fill_distiller, scale_fill_gradient, scale_fill_brewer,
+    labs, theme, element_text, element_blank, guides, guide_legend
 )
-from utils import define_annotation_color
+
+try:
+    from .ec_languages import ec_languages
+    from .utils import define_annotation_color
+except ImportError:
+    # development fallback
+    from ec_languages import ec_languages
+    from utils import define_annotation_color
+
+
 
 # load the data from directory
-ec_languages = pd.read_csv("data/ec_languages.csv")
+# ec_languages = pd.read_csv("data/ec_languages.csv")
 
 
 def ec_tile_map(
@@ -308,7 +320,7 @@ def ec_tile_categorical(data, title, title_position, annotate_feature, abbreviat
         + geom_tile(aes(alpha="alpha"), size=0, color="#E5E5E5", fill="#E5E5E5")
         # colored tiles only for non-NA
         + geom_tile(data=for_plot_non_na, mapping=aes(fill="feature"), size=0)
-        + geom_text(aes(label="language", color="text_color"), size=5.3, show_legend=False)
+        + geom_text(aes(label="language", color="text_color"), show_legend=False)
         + theme_void()
         + labs(title=title)  # removed legend title
 
@@ -323,3 +335,13 @@ def ec_tile_categorical(data, title, title_position, annotate_feature, abbreviat
         + scale_fill_discrete(na_translate=False)
     )
     return p
+
+
+plot = ec_tile_map(ec_languages,
+            feature_column="morning_greetings",
+            title="Morning greetings (Naccarato, Verhees 2021)",
+            title_position = "center") \
+  + scale_fill_brewer(type="qual", palette="Pastel1", na_value=None)
+
+plot.save("morning_greetings_plot.png", dpi=300)
+print("Plot saved as 'morning_greetings_plot.png'")
