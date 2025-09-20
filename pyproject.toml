@@ -35,3 +35,19 @@ license-files = ["LICENSE.md"]
 
 [project.urls]
 Homepage = "https://github.com/LingConLab/PyCaucTile"
+
+# For wheel distributions
+[tool.hatch.build.targets.wheel]
+packages = ["src/pycauctile"]
+force-include = [
+    { "src/pycauctile/data/ec_languages.csv" = "pycauctile/data/ec_languages.csv" }
+]
+
+# For source distributions
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/pycauctile/data/ec_languages.csv",
+    "src/pycauctile/*.py",
+    "LICENSE.md",
+    "README.md",
+]
