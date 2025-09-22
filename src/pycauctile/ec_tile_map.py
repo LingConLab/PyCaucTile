@@ -1,9 +1,11 @@
-import sys
-import os
+"""
+This module provides main PyCaucTile functions to create tile grid map visualizations 
+for East Caucasian language features using plotnine
+"""
 import pandas as pd
 from typing import Optional, Union, Dict, List
 from plotnine import (
-    ggplot, aes, geom_tile, geom_text, annotate,
+    ggplot, aes, geom_tile, geom_text,
     theme_void, scale_fill_manual, scale_color_manual, scale_fill_discrete,
     scale_fill_distiller, scale_fill_gradient, scale_fill_brewer,
     labs, theme, element_text, element_blank, guides, guide_legend
@@ -33,9 +35,49 @@ def ec_tile_map(
       hide_languages=None,
       rename_languages=None,
   ):
-
-
-      # arguments check 
+      """
+        Create a tile grid map visualization for East Caucasian language features
+        
+        Parameters
+        ----------
+        data : pandas.DataFrame, optional
+            DataFrame containing language feature data. Must include a 'language' column
+            and the feature column specified by `feature_column`
+        feature_column : str, default "feature"
+            Name of the column containing linguistic feature values to visualize
+        title : str, optional
+            Title to display above the visualization
+        title_position : str, default "left"
+            Horizontal position of the title: "left", "center", or "right"
+        annotate_feature : bool, default False
+            If True, displays feature values as text annotations on the tiles
+        abbreviation : bool, default True
+            If True, uses language abbreviations instead of full names
+        hide_languages : list of str, optional
+            List of language names to exclude from the visualization
+        rename_languages : dict or pandas.DataFrame, optional
+            Mapping to rename languages. Can be a dictionary {old_name: new_name}
+            or DataFrame with 'language' and 'new_language_name' columns
+        
+        Returns
+        -------
+        plotnine.ggplot
+            A ggplot object that can be displayed, customized, or saved to file
+        
+        Examples
+        --------
+        >>> from pycauctile import ec_tile_map, ec_languages
+        >>> 
+        >>> basic_map = ec_tile_map()
+        >>> 
+        >>> feature_map = ec_tile_map(
+        ...     data=ec_languages,
+        ...     feature_column="consonant_inventory_size",
+        ...     title="Consonant Inventory Size",
+        ...     annotate_feature=True
+        ... )
+      """
+        # arguments check 
 
       # Title
       if title is not None and not isinstance(title, str):
@@ -209,6 +251,23 @@ def ec_tile_map(
 
 
 def ec_template(title, title_position, abbreviation):
+    """
+    Create a template tile map showing language coords and colors without feature data
+    
+    Parameters
+    ----------
+    title : str, optional
+        Title for the visualization
+    title_position : str
+        Horizontal position of the title: "left", "center", or "right"
+    abbreviation : bool
+        If True, uses language abbreviations instead of full names
+    
+    Returns
+    -------
+    plotnine.ggplot
+        A template ggplot object showing language positions
+    """
 
     # load data 
     for_plot = ec_languages.copy()
@@ -247,7 +306,27 @@ def ec_template(title, title_position, abbreviation):
 
 
 def ec_tile_numeric(data, title, title_position, annotate_feature, abbreviation):
+    """
+    Create a tile map for numerical feature data with a gradient color scale
     
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Prepared data for visualization
+    title : str, optional
+        Title for the visualization
+    title_position : str
+        Horizontal position of the title: "left", "center", or "right"
+    annotate_feature : bool
+        Whether to annotate feature values on tiles
+    abbreviation : bool
+        Whether to use language abbreviations
+    
+    Returns
+    -------
+    plotnine.ggplot
+        A ggplot object with numerical feature visualization
+    """    
     # load data 
     for_plot = data.copy()
 
@@ -293,7 +372,27 @@ def ec_tile_numeric(data, title, title_position, annotate_feature, abbreviation)
 
 
 def ec_tile_categorical(data, title, title_position, annotate_feature, abbreviation):
+    """
+    Create a tile map for categorical feature data with discrete color coding
     
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Prepared data for visualization
+    title : str, optional
+        Title for the visualization
+    title_position : str
+        Horizontal position of the title: "left", "center", or "right"
+    annotate_feature : bool
+        Whether to annotate feature values on tiles
+    abbreviation : bool
+        Whether to use language abbreviations
+    
+    Returns
+    -------
+    plotnine.ggplot
+        A ggplot object with categorical feature visualization
+    """    
     # load data 
     for_plot = data.copy()
 
@@ -320,7 +419,7 @@ def ec_tile_categorical(data, title, title_position, annotate_feature, abbreviat
         + geom_tile(aes(alpha="alpha"), size=0, color="#E5E5E5", fill="#E5E5E5")
         # colored tiles only for non-NA
         + geom_tile(data=for_plot_non_na, mapping=aes(fill="feature"), size=0)
-        + geom_text(aes(label="language", color="text_color"), show_legend=False)
+        + geom_text(aes(label="language", color="text_color"), size=5.3, show_legend=False)
         + theme_void()
         + labs(title=title)  # removed legend title
 
@@ -336,12 +435,3 @@ def ec_tile_categorical(data, title, title_position, annotate_feature, abbreviat
     )
     return p
 
-
-plot = ec_tile_map(ec_languages,
-            feature_column="morning_greetings",
-            title="Morning greetings (Naccarato, Verhees 2021)",
-            title_position = "center") \
-  + scale_fill_brewer(type="qual", palette="Pastel1", na_value=None)
-
-plot.save("morning_greetings_plot.png", dpi=300)
-print("Plot saved as 'morning_greetings_plot.png'")
