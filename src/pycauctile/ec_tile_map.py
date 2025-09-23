@@ -20,20 +20,15 @@ except ImportError:
     from utils import define_annotation_color
 
 
-
-# load the data from directory
-# ec_languages = pd.read_csv("data/ec_languages.csv")
-
-
 def ec_tile_map(
-      data=None,
-      feature_column="feature",
-      title=None,
-      title_position="left",
-      annotate_feature=False,
-      abbreviation=True,
-      hide_languages=None,
-      rename_languages=None,
+      data: Optional[pd.DataFrame] = None,
+      feature_column: str = "feature",
+      title: Optional[str] = None,
+      title_position: str = "left",
+      annotate_feature: bool = False,
+      abbreviation: bool = True,
+      hide_languages: Optional[List[str]]=None,
+      rename_languages: Optional[Union[Dict[str, str], pd.DataFrame]] = None,
   ):
       """
         Create a tile grid map visualization for East Caucasian language features
@@ -77,7 +72,7 @@ def ec_tile_map(
         ...     annotate_feature=True
         ... )
       """
-        # arguments check 
+      # arguments check 
 
       # Title
       if title is not None and not isinstance(title, str):
@@ -250,7 +245,11 @@ def ec_tile_map(
               )
 
 
-def ec_template(title, title_position, abbreviation):
+def ec_template(
+    title: Optional[str], 
+    title_position: str, 
+    abbreviation: bool
+    ):
     """
     Create a template tile map showing language coords and colors without feature data
     
@@ -305,7 +304,13 @@ def ec_template(title, title_position, abbreviation):
 
 
 
-def ec_tile_numeric(data, title, title_position, annotate_feature, abbreviation):
+def ec_tile_numeric(
+    data, 
+    title: Optional[str], 
+    title_position: str, 
+    annotate_feature: bool, 
+    abbreviation: bool
+    ):
     """
     Create a tile map for numerical feature data with a gradient color scale
     
@@ -371,7 +376,13 @@ def ec_tile_numeric(data, title, title_position, annotate_feature, abbreviation)
 
 
 
-def ec_tile_categorical(data, title, title_position, annotate_feature, abbreviation):
+def ec_tile_categorical(
+    data, 
+    title: Optional[str], 
+    title_position: str, 
+    annotate_feature: bool, 
+    abbreviation: bool
+    ):
     """
     Create a tile map for categorical feature data with discrete color coding
     
