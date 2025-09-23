@@ -1,5 +1,11 @@
 # PyCaucTile
+
+[![PyPI version](https://img.shields.io/pypi/v/PyCaucTile.svg)](https://pypi.org/project/PyCaucTile/)
+[![Python versions](https://img.shields.io/pypi/pyversions/PyCaucTile.svg)](https://pypi.org/project/PyCaucTile/)
+[![License](https://img.shields.io/pypi/l/PyCaucTile.svg)](https://pypi.org/project/PyCaucTile/)
+
 A package that generates tile grid maps for illustrating features of East Caucasian languages. The plots are created using `plotnine` library, providing a ggplot2-like interface in Python. 
+
 There is an R package that shares the same functionality (see [`RCaucTile`](https://github.com/LingConLab/RCaucTile)) by George Moroz.
 
 

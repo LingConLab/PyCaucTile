@@ -1,0 +1,7 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+author: "Vladislava Termus"
+title: "PyCaucTile: a package for generating tile grid maps of East Caucasian Languages"
+version: 1.0.0
+date-released: 2025-09-23
+url: "https://github.com/LingConLab/PyCaucTile"

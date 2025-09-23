@@ -7,7 +7,7 @@ Features:
 License: GPL-3.0 
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __license__ = "GPL-3.0"
 
 from .ec_languages import load_ec_languages, ec_languages

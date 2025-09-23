@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "PyCaucTile"
-version = "0.1.0"
+version = "1.0.0"
 authors = [
   { name="Vladislava Termus", email="vl.trmus@gmail.com" },
 ]
@@ -50,4 +50,5 @@ include = [
     "src/pycauctile/*.py",
     "LICENSE.md",
     "README.md",
+    "CITATION.cff",
 ]
