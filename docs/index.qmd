@@ -23,24 +23,29 @@ This software was created as a part of the project of the Linguistic Convergence
 The package is available at the PyPI repository, so you can install it using the `pip` command:
 
 ```{python}
+#| output: false
 !pip install pycauctile
 ```
 
 To use `PyCaucTile`, you can import the whole package generally, as well as load the functions and data directly
 
 ```{python}
+#| output: false
 import pycauctile
 ```
 
 ```{python}
+#| output: false
 from pycauctile import ec_tile_map, ec_languages
 ```
 
-## Citation
-
 ```{python}
-# to be updated
+#| include: false
+# imports
+import pandas as pd
+from plotnine import theme, scale_fill_distiller, scale_fill_gradient, scale_fill_brewer, scale_fill_manual
 ```
+
 
 ## How to use `PyCaucTile`
 
@@ -49,9 +54,11 @@ One of the main utilities of the package is a comprehensive template of East Cau
 To display this template, simply call the `ec_tile_map()` function without any arguments:
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 ec_tile_map()
 ```
+![](images/1.png)
 
 As you can see, all languages are color-coded according to their language branch: Nakh languages are brown, Andic languages are blue, Lezgic branch is green, and so on. This template sets the default distribution of languages.
 
@@ -59,16 +66,11 @@ In the core of the package there is a built-in dataset `ec_languages` that conta
 
 ```{python}
 #| colab: {base_uri: https://localhost:8080/, height: 296}
-import pandas as pd
 ec_languages.head()
 ```
 
 ```{python}
 ec_languages.info()
-```
-
-```{python}
-ec_languages.describe()
 ```
 
 The columns also include two features from the Typological Atlas of the Languages of Daghestan:
@@ -79,6 +81,7 @@ The columns also include two features from the Typological Atlas of the Language
 To load your own data, you may prepare a table with columns `language` and `feature` and use it within the `ec_tile_map()` function. While we will create a simple table on the fly for demonstration purposes, in practice it is more convenient to use pandas functions like `read_csv()`, `read_excel()`, or similar data import methods.
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 df = pd.DataFrame({
     'language': ("Avar", "Chechen", "Mehweb"),
@@ -87,6 +90,7 @@ df = pd.DataFrame({
 
 ec_tile_map(df)
 ```
+![](images/2.png)
 
 The languages for which no data in the feature column is available are displayed in light grey color. There is a possibility to hide all unused languages with the ...
 
@@ -97,56 +101,69 @@ The languages for which no data in the feature column is available are displayed
 In practical research scenarios, feature columns often have descriptive names rather than the generic "feature". The `feature_column` parameter in the `ec_tile_map()` function allows providing any name for the data column:
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 ec_tile_map(ec_languages,
             feature_column = "morning_greetings")
 ```
+![](images/3.png)
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 ec_tile_map(ec_languages,
             feature_column = "consonant_inventory_size")
 ```
+![](images/4.png)
 
  To add the title to the plot, use the `title` argument:
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 ec_tile_map(ec_languages,
             feature_column = "morning_greetings",
             title = "Morning greetings (Naccarato, Verhees 2021)")
 ```
+![](images/5.png)
 
 To change the title position (the default position is left), one can use the `title_position` argument with `right` or `center` value:
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 ec_tile_map(ec_languages,
             feature_column = "morning_greetings",
             title = "Morning greetings (Naccarato, Verhees 2021)",
             title_position = "center")
 ```
+![](images/6.png)
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 ec_tile_map(title = "This is a Tile map of East Caucasian languages",
             title_position = "right")
 ```
+![](images/7.png)
 
 For numerical features or categorical variables with concise values, direct annotation of feature values on the map significantly enhances interpretability. The `annotate_feature` parameter contains the functionality:
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 ec_tile_map(ec_languages,
             feature_column = "consonant_inventory_size",
             title = "Consonant inventory size (Moroz 2021)",
             annotate_feature = True)
 ```
+![](images/8.png)
 
 While with long values of categorical features annotations might look messy:
 
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 ec_tile_map(ec_languages,
             title = "Morning greetings (Naccarato, Verhees 2021)",
@@ -154,6 +171,7 @@ ec_tile_map(ec_languages,
             annotate_feature = True,
             title_position = "center")
 ```
+![](images/9.png)
 
 ## Changing the default colors
 
@@ -162,21 +180,21 @@ The default color schemes may not always align with your needs or publication re
 For numerical data, one can use the `scale_fill_distiller()` function with one of the palettes (`Blues`, `BuGn`, `BuPu`, `GnBu`, `Greens`, `Grey`, `Oranges`, `OrRd`, `PuBu`, `PuBuGn`, `PuRd`, `Purples`, `RdPus`, `Reds`, `YlGn`, `YlGnBu`, `YlOrBr`, `YlOrRd`).
 
 
-
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 588}
-from plotnine import scale_fill_distiller
-
 ec_tile_map(ec_languages,
             feature_column = "consonant_inventory_size",
             title = "Consonant inventory size (Moroz 2021)",
             annotate_feature = True) \
   + scale_fill_distiller(palette = "Greens")
 ```
+![](images/10.png)
 
 There is a `direction` argument that controls the order of the colors in the palette, so it can be reversed by setting it to `-1`:
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 588}
 ec_tile_map(ec_languages,
             feature_column = "consonant_inventory_size",
@@ -184,26 +202,26 @@ ec_tile_map(ec_languages,
             annotate_feature = True) \
   + scale_fill_distiller(palette = "Greens", direction=-1)
 ```
+![](images/11.png)
 
 To define your own palette for a numeric variable, you can use the `scale_fill_gradient()` function:
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 588}
-from plotnine import scale_fill_gradient
-
 ec_tile_map(ec_languages,
             feature_column = "consonant_inventory_size",
             title = "Consonant inventory size (Moroz 2021)",
             annotate_feature = True) \
   + scale_fill_gradient(low = "navy", high = "tomato")
 ```
+![](images/12.png)
 
 When the color scheme is clear and the `annotate_feature` argument displays the exact feature values on the map, it makes sense to remove the legend:
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 588}
-from plotnine import theme
-
 ec_tile_map(ec_languages,
             feature_column = "consonant_inventory_size",
             title = "Consonant inventory size (Moroz 2021)",
@@ -211,52 +229,56 @@ ec_tile_map(ec_languages,
   + scale_fill_gradient(low = "navy", high = "tomato") \
   + theme(legend_position = "none")
 ```
+![](images/13.png)
 
 For categorical features, `plotnine` provides the `scale_fill_brewer()` function, which can be used with one of the `ggplot2` palettes (`Accent`, `Dark2`, `Paired`, `Pastel1`, `Pastel2`, `Set1`, `Set2`, `Set3`).
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 568}
-from plotnine import scale_fill_brewer
-
 ec_tile_map(ec_languages,
             feature_column="morning_greetings",
             title="Morning greetings (Naccarato, Verhees 2021)",
             title_position = "center") \
   + scale_fill_brewer(type="qual", palette="Pastel1", na_value=None)
 ```
+![](images/14.png)
 
 The `scale_fill_manual()` function can be used to define your own palette for a categorical feature.
 
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 588}
-from plotnine import scale_fill_manual
-
 ec_tile_map(ec_languages,
             feature_column = "morning_greetings",
             title = "Morning greetings (Naccarato, Verhees 2021)") \
   + scale_fill_manual(values = ("#D81E05", "#0070A1", "#00923F"), na_value=None)
 ```
+![](images/15.png)
 
 ## Changing the values' order
 
 In Python, categorical variables by default follow the order in which unique values first appear in the dataset. To define a custom ordering that better reflects the feature, you can use `pd.Categorical` data type. The following approach preserves the original values while instructing Python to treat them as ordered:
 
 ```{python}
-#| colab: {base_uri: https://localhost:8080/, height: 497}
-#df = pd.DataFrame({
-   # 'language': ['Avar', 'Chechen', 'Lak'],
-   # 'feature': ['value a', 'value b', 'value b']
-#})
+#| eval: false
+#| colab: [object Object]
+#| output: false
+df = pd.DataFrame({
+    'language': ['Avar', 'Chechen', 'Lak'],
+    'feature': ['value a', 'value b', 'value b']
+})
 
-#df['feature'] = pd.Categorical(
-   # df['feature'],
-   # categories=['value b', 'value a'],
-   # ordered=True
-#)
+df['feature'] = pd.Categorical(
+    df['feature'],
+    categories=['value b', 'value a'],
+    ordered=True
+)
 
-#ec_tile_map(df)
+ec_tile_map(df)
 ```
+![](images/16.png)
 
 ## Changing the language template
 
@@ -266,18 +288,21 @@ To remove specific languages from the template, list the desired languages in th
 
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 ec_tile_map(ec_languages,
             feature_column = "morning_greetings",
             title = "Morning greetings (Naccarato, Verhees 2021)",
             hide_languages = ["Gigatli", "Shari", "Chechen"])
 ```
+![](images/17.png)
 
 In order to change the names of existing languages in the template, you need to provide the `rename_languages` argument with an object that maps old language names to their corresponding new names. This can be represented as either:
 
 - A dictionary, where the keys are the old language names and the values are the corresponding new language names.
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 new_language_names = {
     "Upper Andi": "Andi",
@@ -289,10 +314,12 @@ ec_tile_map(ec_languages,
             hide_languages = ["Lower Andi", "Southern Akhvakh"],
             rename_languages = new_language_names)
 ```
+![](images/18.png)
 
 - A data frame with two columns: `language` (the old language names) and `new_language_name` (the corresponding new language names).
 
 ```{python}
+#| output: false
 #| colab: {base_uri: https://localhost:8080/, height: 497}
 new_language_names = pd.DataFrame({
     'language': ["Upper Andi", "Northern Akhvakh"],
@@ -304,6 +331,7 @@ ec_tile_map(ec_languages,
             hide_languages = ["Lower Andi", "Southern Akhvakh"],
             rename_languages = new_language_names)
 ```
+![](images/19.png)
 
 As shown in the example above, we merged:
 
