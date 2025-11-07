@@ -13,7 +13,10 @@ This software was created as a part of the project of the Linguistic Convergence
 pip install pycauctile
 ```
 
-## Example usage
+## Usage
+For detailed description regarding the installation, content, and usage of the package see the [tutorial](https://lingconlab.github.io/PyCaucTile/). 
+
+## Basic examples
 ```python
 from pycauctile import ec_tile_map, ec_languages
 
@@ -38,12 +41,12 @@ Termus, V. (2025). PyCaucTile: a package for generating tile grid maps of East C
 ```
 
 ```
-@software{Termus_PyCaucTile_a_package_2025,
+@software{Termus_PyCaucTile_2025,
 author = {Termus, Vladislava},
+year = {2025},
 month = sep,
 title = {{PyCaucTile: a package for generating tile grid maps of East Caucasian Languages}},
 url = {https://github.com/LingConLab/PyCaucTile},
-version = {1.0.0},
-year = {2025}
+version = {1.0.0}
 }
 ```
