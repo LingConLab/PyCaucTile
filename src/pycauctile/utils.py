@@ -4,10 +4,10 @@ Utility functions for the visualizations
 import pandas as pd
 import matplotlib.colors as mcolors
 import numpy as np
-from typing import Union, List
+from typing import Union, List, Sequence, Dict
 
 
-def define_annotation_color(color: Union[str, List[str]]) -> np.ndarray:
+def _define_annotation_color(color: Union[str, List[str]]) -> np.ndarray:
     """
     Determine optimal text color (black or white) based on background color brightness for readability
  
@@ -40,3 +40,28 @@ def define_annotation_color(color: Union[str, List[str]]) -> np.ndarray:
     text_colors = np.where(brightness > 128, "#000000", "#FFFFFF")
 
     return text_colors
+
+
+def _check_colors(colors: Sequence[str]) -> Dict[str, bool]:
+    """
+    Validate that each string in `colors` is a valid color specification.
+
+    Parameters
+    ----------
+    colors : sequence of str
+        Background color(s) specified as hex codes (e.g., "#FF0000") or 
+        matplotlib color names (e.g., "red"). Can be a single color or a list of colors
+
+    Returns
+    -------
+    dict
+        Mapping {color: True/False} indicating whether each color is valid.
+    """
+    out: Dict[str, bool] = {}
+    for c in colors:
+        try:
+            mcolors.to_rgb(c)
+            out[c] = True
+        except ValueError:
+            out[c] = False
+    return out

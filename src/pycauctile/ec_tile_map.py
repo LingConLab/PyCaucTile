@@ -13,11 +13,11 @@ from plotnine import (
 
 try:
     from .ec_languages import ec_languages
-    from .utils import define_annotation_color
+    from .utils import _define_annotation_color
 except ImportError:
     # development fallback
     from ec_languages import ec_languages
-    from utils import define_annotation_color
+    from utils import _define_annotation_color
 
 
 def ec_tile_map(
@@ -272,7 +272,7 @@ def ec_template(
     for_plot = ec_languages.copy()
 
     # add a 'text_color' column for the text colors 
-    for_plot["text_color"] = define_annotation_color(for_plot["language_color"])
+    for_plot["text_color"] = _define_annotation_color(for_plot["language_color"])
 
     # create a factor for correct coloring in ggplot 
     for_plot["language_color"] = pd.Categorical(
