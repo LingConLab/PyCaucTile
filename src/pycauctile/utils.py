@@ -21,7 +21,7 @@ def define_annotation_color(color: Union[str, List[str]]) -> np.ndarray:
     -------
     numpy.ndarray
         Array of text color codes: "#000000" (black) for light backgrounds,
-        "#E5E5E5" (light gray) for dark backgrounds
+        "#FFFFFF" (white) for dark backgrounds
     
     """
     if isinstance(color, str):
@@ -37,6 +37,6 @@ def define_annotation_color(color: Union[str, List[str]]) -> np.ndarray:
         df["blue"]  * 0.114
     )
 
-    text_colors = np.where(brightness > 160, "#000000", "#E5E5E5")
+    text_colors = np.where(brightness > 128, "#000000", "#FFFFFF")
 
     return text_colors
