@@ -3,22 +3,22 @@ This module provides main PyCaucTile functions to create tile grid map visualiza
 for East Caucasian language features using plotnine
 """
 import pandas as pd
+import numpy as np
+import matplotlib.colors as mcolors
 from typing import Optional, Union, Dict, List
 from plotnine import (
-    ggplot, aes, geom_tile, geom_text,
-    theme_void, scale_fill_manual, scale_color_manual, scale_fill_discrete,
-    scale_fill_distiller, scale_fill_gradient, scale_fill_brewer,
-    labs, theme, element_text, element_blank, guides, guide_legend
+    ggplot, aes, geom_tile, geom_text, theme_void, 
+    scale_fill_manual, scale_color_manual, scale_fill_gradientn, scale_color_identity, 
+    labs, theme, element_text, element_blank, guides, guide_legend, guide_colorbar
 )
 
 try:
     from .ec_languages import ec_languages
-    from .utils import _define_annotation_color
+    from .utils import _define_annotation_color, _check_colors, _palette_from_cmap, _get_cmap
 except ImportError:
     # development fallback
     from ec_languages import ec_languages
-    from utils import _define_annotation_color
-
+    from utils import _define_annotation_color, _check_colors, _palette_from_cmap, _get_cmap
 
 def ec_tile_map(
       data: Optional[pd.DataFrame] = None,
@@ -29,6 +29,8 @@ def ec_tile_map(
       abbreviation: bool = True,
       hide_languages: Optional[List[str]]=None,
       rename_languages: Optional[Union[Dict[str, str], pd.DataFrame]] = None,
+      tile_colors=None, 
+      palette_reverse=False
   ):
       """
         Create a tile grid map visualization for East Caucasian language features
@@ -132,6 +134,10 @@ def ec_tile_map(
                   "The names in 'rename_languages' contain unexpected values, see 'ec_languages$language' for the possible values"
               )
 
+      # palette_reverse
+      if not isinstance(palette_reverse, bool):
+          raise ValueError("The argument 'palette_reverse' should be a logical vector with one value")
+
       # restructure rename_languages 
 
       if isinstance(rename_languages, dict):
@@ -177,6 +183,7 @@ def ec_tile_map(
           for_plot = ec_languages.copy() # copy to keep ec_languages order
           for_plot = for_plot.merge(data, on="language", how="left", suffixes=("", "_y"))
 
+          # create a column with the name feature if there is no one
           for_plot = for_plot.rename(columns={feature_column: "feature"})
 
           # delete with _y
@@ -202,9 +209,6 @@ def ec_tile_map(
           if hide_languages is not None:
               for_plot = for_plot[~for_plot["language"].isin(hide_languages)]
 
-          # create a column with the name feature if there is no one 
-
-          for_plot = for_plot.rename(columns={feature_column: "feature"})
 
           # add an 'alpha' column for the cases when there are NAs in data 
           for_plot["alpha"] = for_plot["feature"].apply(lambda x: 0.2 if pd.isna(x) else 1)
@@ -233,7 +237,9 @@ def ec_tile_map(
                   title=title,
                   title_position=title_position,
                   annotate_feature=annotate_feature,
-                  abbreviation=abbreviation
+                  abbreviation=abbreviation,
+                  tile_colors=tile_colors,
+                  palette_reverse=palette_reverse
               )
           else:
               return ec_tile_categorical(
@@ -241,13 +247,15 @@ def ec_tile_map(
                   title=title,
                   title_position=title_position,
                   annotate_feature=annotate_feature,
-                  abbreviation=abbreviation
+                  abbreviation=abbreviation,
+                  tile_colors=tile_colors,
+                  palette_reverse=palette_reverse
               )
 
 
 def ec_template(
     title: Optional[str], 
-    title_position: str, 
+    title_position: float, 
     abbreviation: bool
     ):
     """
@@ -303,85 +311,14 @@ def ec_template(
     return map
 
 
-
-def ec_tile_numeric(
-    data, 
-    title: Optional[str], 
-    title_position: str, 
-    annotate_feature: bool, 
-    abbreviation: bool
-    ):
-    """
-    Create a tile map for numerical feature data with a gradient color scale
-    
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        Prepared data for visualization
-    title : str, optional
-        Title for the visualization
-    title_position : str
-        Horizontal position of the title: "left", "center", or "right"
-    annotate_feature : bool
-        Whether to annotate feature values on tiles
-    abbreviation : bool
-        Whether to use language abbreviations
-    
-    Returns
-    -------
-    plotnine.ggplot
-        A ggplot object with numerical feature visualization
-    """    
-    # load data 
-    for_plot = data.copy()
-
-    # black for NA and grey90 for non-NA  
-    for_plot["text_color"] = for_plot["feature"].isna().map(
-        lambda is_na: "#000000" if is_na else "#E5E5E5"
-    )
-
-    #for_plot["alpha"] = for_plot["feature"].apply(lambda x: 0.85 if pd.isna(x) else 1)
-
-    # subset with non-NA values
-    for_plot_non_na = for_plot[for_plot["feature"].notna()].copy()
-
-    # color mapping for correct order in the scale 
-    color_mapping = {
-        "#000000": "#000000",  # NA
-        "#E5E5E5": "#E5E5E5"   # non-NA
-    }
-
-    # create a map 
-    p = (
-        ggplot(for_plot, aes("x", "y", alpha="alpha"))
-        # base grey90 tiles
-        + geom_tile(aes(alpha="alpha"), size=0, color="#E5E5E5", fill="#E5E5E5")
-        # colored tiles only for non-NA
-        + geom_tile(data=for_plot_non_na, mapping=aes(fill="feature", alpha="alpha"), size=0)
-        + geom_text(aes(label="language", color="text_color"), size=5.3, show_legend=False)
-        + theme_void()
-        + labs(title=title) # removed legend title
-        + theme(
-            legend_position="bottom",
-            plot_title=element_text(hjust=title_position, size=6.3),
-            legend_text=element_text(size=5.3),
-            legend_title=element_blank() # removed legend title
-        )
-        + guides(alpha="none", fill=guide_legend(title=None))
-        + scale_color_manual(values=color_mapping)  
-        + scale_fill_gradient(low="#DEEBF7", high="#2171B5") # some blue scale, lighter than ggplot default
-    )
-
-    return p
-
-
-
 def ec_tile_categorical(
     data, 
     title: Optional[str], 
-    title_position: str, 
+    title_position: float, 
     annotate_feature: bool, 
-    abbreviation: bool
+    abbreviation: bool,
+    tile_colors: Optional[Union[str, List[str]]] = None,
+    palette_reverse: bool = False
     ):
     """
     Create a tile map for categorical feature data with discrete color coding
@@ -407,42 +344,186 @@ def ec_tile_categorical(
     # load data 
     for_plot = data.copy()
 
-    # black for both non-NA and NA 
-    for_plot["text_color"] = for_plot["feature"].isna().map(
-        lambda is_na: "#000000" if is_na else "#000000"
-    )
+    # type safety for correct mapping
+    for_plot["feature"] = for_plot["feature"].astype("string")
+    
+    levels = sorted(for_plot["feature"].dropna().unique().tolist())
+    n_levels = len(levels)
 
-    # subset with non-NA values 
-    for_plot_non_na = for_plot[for_plot["feature"].notna()].copy()
-    # convert to categorical
-    for_plot_non_na["feature"] = pd.Categorical(for_plot_non_na["feature"])
+    # default simple palettes
+    if n_levels > 10:
+        default_palette = 'Set3'
+    else:
+        default_palette = 'Set2'
 
-    # color mapping for correct order in the scale 
-    color_mapping = {
-        "#000000": "#000000",  # non-NA
-        "#999999": "#999999"  # NA
-    }
 
+    # default palette
+    if tile_colors == None:
+        palette = _palette_from_cmap(default_palette, n_levels)
+        
+    # name of palette
+    elif isinstance(tile_colors, str):
+        palette = _palette_from_cmap(tile_colors, n_levels, reverse=palette_reverse)
+        
+    # list of colors
+    else:
+        checks = _check_colors(tile_colors)
+        wrong_names = [c for c, ok in checks.items() if not ok]
+        if wrong_names:
+            raise ValueError("The argument 'tile_colors' contains unavailable color names: " + ", ".join(wrong_names))
+
+        if len(tile_colors) != n_levels:
+            raise ValueError(
+                f"Argument 'tile_colors' does not equal the number of categorical values for the feature: "
+                f"expected ({n_levels}), but got {len(tile_colors)}"
+            ) 
+
+        if palette_reverse:
+            palette = list(tile_colors)[::-1] 
+        else:
+            palette = list(tile_colors)
+
+
+    # map colors to feature values
+    value_color_map = dict(zip(levels, palette))
+    for_plot["tile_color"] = for_plot["feature"].map(value_color_map)
+    # NA tiles 
+    for_plot["tile_color"] = for_plot["tile_color"].fillna("#E5E5E5")
+    
+    for_plot["text_color"] = _define_annotation_color(for_plot["tile_color"])
+
+    
     # create a map
     p = (
         ggplot(for_plot, aes("x", "y", alpha="alpha"))
-        # base grey90 tiles
+        # base grey tiles
         + geom_tile(aes(alpha="alpha"), size=0, color="#E5E5E5", fill="#E5E5E5")
         # colored tiles only for non-NA
-        + geom_tile(data=for_plot_non_na, mapping=aes(fill="feature"), size=0)
+        + geom_tile(aes(fill="feature"), size=0)
         + geom_text(aes(label="language", color="text_color"), size=5.3, show_legend=False)
         + theme_void()
-        + labs(title=title)  # removed legend title
+        + labs(title=title)  
 
         + theme(
             legend_position="bottom",
             plot_title=element_text(hjust=title_position, size=6.3),
             legend_text=element_text(size=5.3),
-            legend_title=element_blank()  # removed legend title
+            legend_title=element_blank()  
         )
-        + guides(alpha="none", fill=guide_legend(title=None))  
-        + scale_color_manual(values=color_mapping)
-        + scale_fill_discrete(na_translate=False)
+        # discrete legend
+        + guides(alpha="none", fill=guide_legend(title=None), color="none")  
+        + scale_color_identity()
+        + scale_fill_manual(values=value_color_map, na_value="#E5E5E5", na_translate=False)
     )
+
     return p
 
+
+def ec_tile_numeric(
+    data, 
+    title: Optional[str], 
+    title_position: float, 
+    annotate_feature: bool, 
+    abbreviation: bool,
+    tile_colors: Optional[Union[str, List[str]]] = None,
+    palette_reverse: bool = False
+    ):
+    """
+    Create a tile map for numerical feature data with a gradient color scale
+    
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Prepared data for visualization
+    title : str, optional
+        Title for the visualization
+    title_position : str
+        Horizontal position of the title: "left", "center", or "right"
+    annotate_feature : bool
+        Whether to annotate feature values on tiles
+    abbreviation : bool
+        Whether to use language abbreviations
+    
+    Returns
+    -------
+    plotnine.ggplot
+        A ggplot object with numerical feature visualization
+    """    
+    # load data 
+    for_plot = data.copy()
+
+    # type safety (+ try coercing) 
+    for_plot["feature"] = pd.to_numeric(for_plot["feature"], errors="coerce")
+
+    default_palette = 'Blues'
+
+
+    # default palette
+    if tile_colors is None:
+        palette = _palette_from_cmap(default_palette, 256, reverse=palette_reverse)
+
+    # name of palette     
+    elif isinstance(tile_colors, str):
+        palette = _palette_from_cmap(tile_colors, 256, reverse=palette_reverse)
+
+    # list of colors        
+    elif len(tile_colors) in (2, 3):
+        checks = _check_colors(tile_colors)
+        wrong_names = [c for c, ok in checks.items() if not ok]
+        if wrong_names:
+            raise ValueError("The argument 'tile_colors' contains unavailable color names: " + ", ".join(wrong_names))
+
+        if palette_reverse:
+            palette = list(tile_colors[::-1]) 
+        else: 
+            palette = list(tile_colors)
+        
+    elif len(tile_colors) > 3:
+        raise ValueError(
+              "The argument 'tile_colors' of length 1 should be either a list of length 2 or 3 "
+                "or a matplotlib colormap name (string)."
+          )
+    
+
+    # NA tiles
+    for_plot["tile_color"] = "#E5E5E5"
+    for_plot["text_color"] = "#000000"
+
+    for_plot_non_na = for_plot["feature"].notna()
+    
+    if for_plot_non_na.any():
+        vals = for_plot.loc[for_plot_non_na, "feature"].astype(float).to_numpy()
+        vmin = float(np.nanmin(vals))
+        vmax = float(np.nanmax(vals))
+
+        norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+        cmap_local = mcolors.LinearSegmentedColormap.from_list("tile_numeric", palette)
+
+        for_plot.loc[for_plot_non_na, "tile_color"] = [mcolors.to_hex(cmap_local(norm(v))) for v in vals]
+
+        for_plot.loc[for_plot_non_na, "text_color"] = _define_annotation_color(for_plot.loc[for_plot_non_na, "tile_color"])
+ 
+
+    # create a map 
+    p = (
+        ggplot(for_plot, aes("x", "y", alpha="alpha"))
+        # base grey tiles
+        + geom_tile(aes(alpha="alpha"), size=0, color="#E5E5E5", fill="#E5E5E5")
+        # colored tiles only for non-NA
+        + geom_tile(aes(fill="feature"))
+        + geom_text(aes(label="language", color="text_color"), size=5.3, show_legend=False)
+        + theme_void()
+        + labs(title=title) 
+        + theme(
+            legend_position="bottom",
+            plot_title=element_text(hjust=title_position, size=6.3),
+            legend_text=element_text(size=5.3),
+            legend_title=element_blank() 
+        )
+        # continuous legend
+        + guides(alpha="none", fill=guide_colorbar(title=None))
+        + scale_color_identity()
+        + scale_fill_gradientn(colors=palette, na_value="#E5E5E5")
+    )
+
+    return p

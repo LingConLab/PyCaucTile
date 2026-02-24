@@ -2,8 +2,10 @@
 Utility functions for the visualizations
 """
 import pandas as pd
-import matplotlib.colors as mcolors
 import numpy as np
+import matplotlib
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 from typing import Union, List, Sequence, Dict
 
 
@@ -65,3 +67,41 @@ def _check_colors(colors: Sequence[str]) -> Dict[str, bool]:
         except ValueError:
             out[c] = False
     return out
+    
+
+
+def _palette_from_cmap(name: str, n: int, reverse: bool = False) -> List[str]:
+    
+    cmap = _get_cmap(name)  
+
+    # qualitative colormap -> colors in their defined order
+    if hasattr(cmap, "colors") and cmap.colors is not None:
+        base = [mcolors.to_hex(c, keep_alpha=False) for c in cmap.colors]
+        if reverse:
+            base = base[::-1]
+
+        # fewer colors
+        if n <= len(base):
+            return base[:n]
+
+        # more colors
+        out = []
+        while len(out) < n:
+            out.extend(base)
+        return out[:n]
+
+    # continuous colormap
+    if reverse:
+        cmap = cmap.reversed()
+
+    xs = np.linspace(0, 1, n) if n > 1 else [0.5]
+    return [mcolors.to_hex(cmap(x), keep_alpha=False) for x in xs]
+
+
+def _get_cmap(name: str):
+    
+    if hasattr(matplotlib, "colormaps"):
+        # matplotlib >= 3.7
+        return matplotlib.colormaps.get_cmap(name)
+    # matplotlib < 3.7
+    return cm.get_cmap(name)
