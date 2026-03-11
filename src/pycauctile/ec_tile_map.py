@@ -178,16 +178,18 @@ def ec_tile_map(
           # !! just a string
           if not isinstance(feature_column, str):
               raise ValueError("The argument 'feature_column' should be a character vector with one value")
-          
+        
+
+          # rename the user feature column before merge
+          data2 = data.copy()
+          data2 = data2.rename(columns={feature_column: "feature"})
+
           # merge EC dataset with data provided by a user
-          for_plot = ec_languages.copy() # copy to keep ec_languages order
-          for_plot = for_plot.merge(data, on="language", how="left", suffixes=("", "_y"))
+          for_plot = ec_languages.copy()   # keep ec_languages order
+          for_plot = for_plot.merge(data2, on="language", how="left", suffixes=("", "_y"))
 
-          # create a column with the name feature if there is no one
-          for_plot = for_plot.rename(columns={feature_column: "feature"})
-
-          # delete with _y
-          cols_to_drop = [col for col in for_plot.columns if col.endswith('_y')]
+          # drop accidental duplicate columns from user data
+          cols_to_drop = [col for col in for_plot.columns if col.endswith("_y")]
           for_plot = for_plot.drop(columns=cols_to_drop)
 
           # for missing colors
@@ -290,14 +292,14 @@ def ec_template(
     )
 
     # change labels to abbreviations 
-    if abbreviation is True:
+    if abbreviation:
         for_plot["language"] = for_plot.apply(
             lambda r: r["language"] if pd.isna(r["abbreviation"]) else r["abbreviation"],
             axis=1
         )
 
     # create a map 
-    map = (
+    p = (
         ggplot(for_plot, aes("x", "y"))
         + geom_tile(aes(fill="language_color"), show_legend=False)
         + geom_text(aes(label="language", color="text_color"), show_legend=False, size = 5.3)
@@ -308,7 +310,7 @@ def ec_template(
         + theme(plot_title=element_text(hjust=title_position))
     )
 
-    return map
+    return p
 
 
 def ec_tile_categorical(
@@ -358,7 +360,7 @@ def ec_tile_categorical(
 
 
     # default palette
-    if tile_colors == None:
+    if tile_colors is None:
         palette = _palette_from_cmap(default_palette, n_levels)
         
     # name of palette
@@ -467,7 +469,7 @@ def ec_tile_numeric(
         palette = _palette_from_cmap(tile_colors, 256, reverse=palette_reverse)
 
     # list of colors        
-    elif len(tile_colors) in (2, 3):
+    elif isinstance(tile_colors, (list, tuple)) and len(tile_colors) in (2, 3):
         checks = _check_colors(tile_colors)
         wrong_names = [c for c, ok in checks.items() if not ok]
         if wrong_names:
@@ -477,13 +479,12 @@ def ec_tile_numeric(
             palette = list(tile_colors[::-1]) 
         else: 
             palette = list(tile_colors)
-        
-    elif len(tile_colors) > 3:
-        raise ValueError(
-              "The argument 'tile_colors' of length 1 should be either a list of length 2 or 3 "
-                "or a matplotlib colormap name (string)."
-          )
     
+    else:
+        raise ValueError(
+            "The argument 'tile_colors' should be either a matplotlib colormap name (string) "
+            "or a list of length 2 or 3."
+        )  
 
     # NA tiles
     for_plot["tile_color"] = "#E5E5E5"
