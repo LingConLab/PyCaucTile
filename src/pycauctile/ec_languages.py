@@ -45,7 +45,7 @@ def load_ec_languages() -> pd.DataFrame:
                 return pd.read_csv(data_path)
             except FileNotFoundError:
                 raise FileNotFoundError(
-                    "Could not find ec_languages.csv "
+                    "Could not find ec_languages.csv in package resources or the local data directory."
                 )
 
 

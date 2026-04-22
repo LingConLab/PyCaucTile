@@ -5,7 +5,7 @@ for East Caucasian language features using plotnine
 import pandas as pd
 import numpy as np
 import matplotlib.colors as mcolors
-from typing import Optional, Union, Dict, List
+from typing import Optional, Union, Dict, List, Sequence
 from plotnine import (
     ggplot, aes, geom_tile, geom_text, theme_void, 
     scale_fill_manual, scale_color_manual, scale_fill_gradientn, scale_color_identity, 
@@ -14,11 +14,12 @@ from plotnine import (
 
 try:
     from .ec_languages import ec_languages
-    from .utils import _define_annotation_color, _check_colors, _palette_from_cmap, _get_cmap
+    from .utils import _define_annotation_color, _check_colors, _palette_from_cmap
 except ImportError:
     # development fallback
     from ec_languages import ec_languages
-    from utils import _define_annotation_color, _check_colors, _palette_from_cmap, _get_cmap
+    from utils import _define_annotation_color, _check_colors, _palette_from_cmap
+
 
 def ec_tile_map(
       data: Optional[pd.DataFrame] = None,
@@ -29,8 +30,8 @@ def ec_tile_map(
       abbreviation: bool = True,
       hide_languages: Optional[List[str]]=None,
       rename_languages: Optional[Union[Dict[str, str], pd.DataFrame]] = None,
-      tile_colors=None, 
-      palette_reverse=False
+      tile_colors: Optional[Union[str, Sequence[str]]] = None, 
+      palette_reverse: bool = False
   ):
       """
         Create a tile grid map visualization for East Caucasian language features
@@ -78,32 +79,32 @@ def ec_tile_map(
 
       # Title
       if title is not None and not isinstance(title, str):
-          raise ValueError("The argument 'title' should be a character vector with one value")
+          raise ValueError("The argument `title` must be a string or None.")
 
       # Title position
       if not isinstance(title_position, str):
           raise ValueError(
-              "The argument 'title_position' should be a character vector with one of the following values: 'left', 'center', or 'right'"
+              "The argument `title_position` must be a string."
           )
 
       if title_position not in ('left', 'center', 'right'):
           raise ValueError(
-              "The argument 'title_position' should be a character vector with one of the following values: 'left', 'center', or 'right'"
+              "The argument `title_position`  must be one of: 'left', 'center', 'right'."
           )
 
       # Annotate feature
       if not isinstance(annotate_feature, bool):
-          raise ValueError("The argument 'annotate_feature' should be a logical vector with one value")
+          raise ValueError("The argument `annotate_feature` must be a boolean.")
 
       # Abbreviation
       if not isinstance(abbreviation, bool):
-          raise ValueError("The argument 'abbreviation' should be a logical vector with one value")
+          raise ValueError("The argument `abbreviation` must be a boolean.")
 
       # Hide languages
       if hide_languages is not None:
           if not all(lang in ec_languages["language"].tolist() for lang in hide_languages):
               raise ValueError(
-                  "The argument 'hide_languages' should be a character vector with languages, see 'ec_languages$language' for the possible values"
+                  "The argument `hide_languages` must be a list of language names, see 'ec_languages['language']' for the possible values."
               )
 
       # Rename languages
@@ -116,27 +117,27 @@ def ec_tile_map(
 
           if not (is_named_vector or is_valid_df):
               raise ValueError(
-                  "The argument 'rename_languages' should be either a named character vector with languages as a name or dataframe with columns 'language' and 'new_language_name', see 'ec_languages$language' for the possible values"
+                  "The argument `rename_languages` must be either a dict or a pandas DataFrame with columns `language` and `new_language_name`."
               )
 
       if isinstance(rename_languages, pd.DataFrame):
           if not ("language" in rename_languages.columns and "new_language_name" in rename_languages.columns):
               raise ValueError(
-                  "The argument 'rename_languages' should be either a named character vector with languages as a name or dataframe with columns 'language' and 'new_language_name', see 'ec_languages$language' for the possible values"
+                  "The argument `rename_languages` must contain columns `language` and `new_language_name`."
               )
           if not all(lang in ec_languages["language"].tolist() for lang in rename_languages["language"]):
               raise ValueError(
-                  "The 'language' column in 'rename_languages' contains unexpected values, see 'ec_languages$language' for the possible values"
+                  "Invalid values in `rename_languages['language']`, see 'ec_languages['language']' for the possible values.."
               )
       elif isinstance(rename_languages, dict):
           if not all(name in ec_languages["language"].tolist() for name in rename_languages.keys()):
               raise ValueError(
-                  "The names in 'rename_languages' contain unexpected values, see 'ec_languages$language' for the possible values"
+                  "Invalid keys in `rename_languages`, see 'ec_languages['language']' for the possible values.."
               )
 
       # palette_reverse
       if not isinstance(palette_reverse, bool):
-          raise ValueError("The argument 'palette_reverse' should be a logical vector with one value")
+          raise ValueError("The argument `palette_reverse` must be a boolean.")
 
       # restructure rename_languages 
 
@@ -168,16 +169,16 @@ def ec_tile_map(
           # arguments check 
 
           if not isinstance(data, pd.DataFrame):
-              raise ValueError("Data should be a dataframe")
+              raise ValueError("`data` must be a pandas DataFrame.")
           if "language" not in data.columns:
-              raise ValueError("Data should contain column 'language'")
+              raise ValueError("`data` must contain a `language` column.")
           if feature_column not in data.columns:
               raise ValueError(
-                  "Data should contain column 'feature'. If you have a column with a different name, please, use the argument 'feature_column' to provide it."
+                  f"`data` must contain the feature column '{feature_column}'. If you have a column with a different name, please, use the argument 'feature_column' to provide it."
               )
           # !! just a string
           if not isinstance(feature_column, str):
-              raise ValueError("The argument 'feature_column' should be a character vector with one value")
+              raise ValueError("The argument 'feature_column' must be a string.")
         
 
           # rename the user feature column before merge
@@ -319,7 +320,7 @@ def ec_tile_categorical(
     title_position: float, 
     annotate_feature: bool, 
     abbreviation: bool,
-    tile_colors: Optional[Union[str, List[str]]] = None,
+    tile_colors: Optional[Union[str, Sequence[str]]] = None,
     palette_reverse: bool = False
     ):
     """
@@ -362,29 +363,35 @@ def ec_tile_categorical(
     # default palette
     if tile_colors is None:
         palette = _palette_from_cmap(default_palette, n_levels)
-        
+
     # name of palette
     elif isinstance(tile_colors, str):
         palette = _palette_from_cmap(tile_colors, n_levels, reverse=palette_reverse)
-        
+
     # list of colors
-    else:
+    elif isinstance(tile_colors, (list, tuple)):
         checks = _check_colors(tile_colors)
         wrong_names = [c for c, ok in checks.items() if not ok]
         if wrong_names:
-            raise ValueError("The argument 'tile_colors' contains unavailable color names: " + ", ".join(wrong_names))
+            raise ValueError(
+                "Invalid color names in `tile_colors`: " + ", ".join(wrong_names)
+            )
 
         if len(tile_colors) != n_levels:
             raise ValueError(
-                f"Argument 'tile_colors' does not equal the number of categorical values for the feature: "
-                f"expected ({n_levels}), but got {len(tile_colors)}"
-            ) 
+                f"`tile_colors` must contain exactly {n_levels} colors for this feature."
+            )
 
         if palette_reverse:
             palette = list(tile_colors)[::-1] 
         else:
             palette = list(tile_colors)
 
+    else:
+        raise ValueError(
+            "`tile_colors` must be None, a colormap name, or a list/tuple of colors."
+        )
+    
 
     # map colors to feature values
     value_color_map = dict(zip(levels, palette))
@@ -427,7 +434,7 @@ def ec_tile_numeric(
     title_position: float, 
     annotate_feature: bool, 
     abbreviation: bool,
-    tile_colors: Optional[Union[str, List[str]]] = None,
+    tile_colors: Optional[Union[str, Sequence[str]]] = None,
     palette_reverse: bool = False
     ):
     """
@@ -473,7 +480,9 @@ def ec_tile_numeric(
         checks = _check_colors(tile_colors)
         wrong_names = [c for c, ok in checks.items() if not ok]
         if wrong_names:
-            raise ValueError("The argument 'tile_colors' contains unavailable color names: " + ", ".join(wrong_names))
+            raise ValueError(
+                "Invalid color names in `tile_colors`: " + ", ".join(wrong_names)
+            )
 
         if palette_reverse:
             palette = list(tile_colors[::-1]) 
@@ -482,8 +491,7 @@ def ec_tile_numeric(
     
     else:
         raise ValueError(
-            "The argument 'tile_colors' should be either a matplotlib colormap name (string) "
-            "or a list of length 2 or 3."
+            "`tile_colors` must be None, a colormap name, or a list/tuple of 2 or 3 colors."
         )  
 
     # NA tiles

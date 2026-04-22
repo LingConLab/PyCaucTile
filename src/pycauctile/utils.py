@@ -9,7 +9,7 @@ import matplotlib.colors as mcolors
 from typing import Union, List, Sequence, Dict
 
 
-def _define_annotation_color(color: Union[str, List[str]]) -> np.ndarray:
+def _define_annotation_color(color: Union[str, Sequence[str]]) -> np.ndarray:
     """
     Determine optimal text color (black or white) based on background color brightness for readability
  
@@ -69,8 +69,10 @@ def _check_colors(colors: Sequence[str]) -> Dict[str, bool]:
     return out
     
 
-
 def _palette_from_cmap(name: str, n: int, reverse: bool = False) -> List[str]:
+    
+    if n <= 0:
+        raise ValueError("`n` must be a positive integer.")
     
     cmap = _get_cmap(name)  
 
@@ -99,9 +101,32 @@ def _palette_from_cmap(name: str, n: int, reverse: bool = False) -> List[str]:
 
 
 def _get_cmap(name: str):
-    
-    if hasattr(matplotlib, "colormaps"):
-        # matplotlib >= 3.7
-        return matplotlib.colormaps.get_cmap(name)
-    # matplotlib < 3.7
-    return cm.get_cmap(name)
+    """
+    Return a matplotlib colormap by name with version compatibility.
+
+    Parameters
+    ----------
+    name : str
+        Name of a matplotlib colormap.
+
+    Returns
+    -------
+    matplotlib.colors.Colormap
+        The requested colormap.
+
+    Raises
+    ------
+    ValueError
+        If the colormap name is unknown.
+    """
+    try:
+        if hasattr(matplotlib, "colormaps"):
+            # matplotlib >= 3.7
+            return matplotlib.colormaps.get_cmap(name)
+        # matplotlib < 3.7
+        return cm.get_cmap(name)
+    except ValueError as e:
+        raise ValueError(
+            f"Unknown colormap '{name}'. Pass a valid matplotlib colormap name "
+            "(e.g. 'viridis', 'Blues', or 'Set2')."
+        ) from e
